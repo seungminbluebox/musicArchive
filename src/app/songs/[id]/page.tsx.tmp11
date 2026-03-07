@@ -1,0 +1,28 @@
+import { getSongs } from "@/lib/songs";
+import SongDetail from "@/components/SongDetail";
+import { notFound } from "next/navigation";
+import { Song } from "@/types/song";
+
+export async function generateStaticParams() {
+  const songs = getSongs();
+  return songs.map((song: Song) => ({
+    id: song.id,
+  }));
+}
+
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const resolvedParams = await params;
+  const id = resolvedParams.id;
+  const songs = getSongs();
+  const song = songs.find((s: Song) => s.id === id);
+
+  if (!song) {
+    notFound();
+  }
+
+  return <SongDetail song={song} />;
+}

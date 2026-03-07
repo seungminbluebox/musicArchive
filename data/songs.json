@@ -1,0 +1,24 @@
+[
+  {
+    "id": "1",
+    "title": "orange",
+    "artist": "Coll!n",
+    "themeBase": "#F4CCAC",
+    "themeSub": "#E6A17C",
+    "themeAccent": "#D1603D",
+    "themeText": "#FFFFFF",
+    "audioSrc": "/orange-collin/orange-collin.flac",
+    "images": [
+      "/orange-collin/1.jpg",
+      "/orange-collin/2.jpg",
+      "/orange-collin/3.jpg",
+      "/orange-collin/4.jpg",
+      "/orange-collin/5.jpg",
+      "/orange-collin/6.jpg",
+      "/orange-collin/7.jpg"
+    ],
+    "highlightLyrics": "오늘 처음으로 알게 됐어 난\n바다에도 별이 뜨구나\n네 눈을 보고 알게 됐어",
+    "log": "들으면 여름이 생각나는 노래,\n여름이면 생각나는 노래",
+    "createdAt": "2026-03-01T10:00:00Z"
+  }
+]
