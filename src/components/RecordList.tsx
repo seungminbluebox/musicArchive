@@ -8,7 +8,7 @@ import { Song } from "@/types/song";
 export default function RecordList({ songs }: { songs: Song[] }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 p-8 max-w-7xl mx-auto">
-      {songs.map((song: Song) => (
+      {songs.map((song: Song, index: number) => (
         <Link key={song.id} href={`/songs/${song.id}`}>
           <motion.div
             className="flex flex-col group cursor-pointer"
@@ -34,7 +34,7 @@ export default function RecordList({ songs }: { songs: Song[] }) {
                 )}
               </motion.div>
               <div className="absolute top-2 left-2 px-2 py-1 bg-black/50 text-white text-[10px] font-mono rounded backdrop-blur-sm">
-                01
+                {(index + 1).toString().padStart(2, "0")}
               </div>
             </div>
             <div

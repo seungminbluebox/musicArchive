@@ -6,7 +6,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-black text-white px-8">
-      <header className="py-24 flex flex-col md:flex-row justify-between items-center border-b border-neutral-800/50">
+      <header className="py-9 flex flex-col md:flex-row justify-between items-center border-b border-neutral-800/50">
         <a className="flex items-center gap-4" href="/">
           <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-orange-500 to-purple-600 animate-pulse"></div>
           <h1 className="text-xl font-black uppercase tracking-tighter">

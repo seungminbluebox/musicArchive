@@ -36,7 +36,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (typeof window !== "undefined" && !audioObjectRef.current) {
       const audio = new Audio();
-      audio.volume = TARGET_VOLUME; 
+      audio.volume = TARGET_VOLUME;
       audioObjectRef.current = audio;
 
       const updateProgress = () => {
@@ -84,10 +84,10 @@ export function AudioProvider({ children }: { children: ReactNode }) {
 
   const fadeIn = (audio: HTMLAudioElement) => {
     if (fadeIntervalRef.current) clearInterval(fadeIntervalRef.current);
-    
+
     audio.volume = 0;
     safePlay(audio);
-    
+
     let vol = 0;
     fadeIntervalRef.current = setInterval(() => {
       if (vol < TARGET_VOLUME) {
@@ -108,7 +108,8 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     fadeIntervalRef.current = setInterval(async () => {
       if (vol > 0.015) {
         vol -= 0.015;
-        if (audioObjectRef.current) audioObjectRef.current.volume = Math.max(0, vol);
+        if (audioObjectRef.current)
+          audioObjectRef.current.volume = Math.max(0, vol);
       } else {
         clearInterval(fadeIntervalRef.current as NodeJS.Timeout);
         if (audioObjectRef.current) {
@@ -124,7 +125,11 @@ export function AudioProvider({ children }: { children: ReactNode }) {
 
   const playSong = async (song: Song) => {
     // 1. If same song is PASSED (not just mounted)
-    if (currentSong?.id === song.id) {
+    // 앨범 내 트랙 전환을 위해 audioSrc까지 체크합니다.
+    if (
+      currentSong?.id === song.id &&
+      currentSong?.audioSrc === song.audioSrc
+    ) {
       if (!isPlaying && audioObjectRef.current) {
         await safePlay(audioObjectRef.current);
         setIsPlaying(true);
@@ -132,11 +137,11 @@ export function AudioProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    // 2. Different song logic
-    if (currentSong && isPlaying) {
-      fadeOutAndChange(song);
-    } else {
-      if (audioObjectRef.current) {
+    // 2. Different track or song logic
+    if (audioObjectRef.current) {
+      if (isPlaying) {
+        fadeOutAndChange(song);
+      } else {
         audioObjectRef.current.src = song.audioSrc;
         setCurrentSong(song);
         fadeIn(audioObjectRef.current);

@@ -9,14 +9,18 @@ import {
   Pause as PauseIcon,
   ChevronLeft as BackIcon,
   ArrowUp as UpIcon,
+  Music as MusicIcon,
 } from "lucide-react";
 
 import { useAudio } from "@/context/AudioContext";
-import { Song } from "@/types/song";
+import { Song, Track } from "@/types/song";
 
 export default function SongDetail({ song }: { song: Song }) {
   const { currentSong, isPlaying, playSong, pauseAudio, progress } = useAudio();
   const [isRotating, setIsRotating] = useState(false);
+  const [activeTrack, setActiveTrack] = useState<Track | null>(
+    song.tracks?.[0] || null,
+  );
   const containerRef = useRef<HTMLDivElement>(null);
 
   // 1. Scroll Progress Tracking
@@ -43,9 +47,38 @@ export default function SongDetail({ song }: { song: Song }) {
   const logOpacity = useTransform(smoothProgress, [0.3, 0.5], [0, 1]);
   const logY = useTransform(smoothProgress, [0.3, 0.5], [30, 0]);
 
+  // Track switching logic based on single song or tracks array
+  const currentDisplayTitle = activeTrack?.title || song.title;
+  const currentDisplayLyrics =
+    activeTrack?.highlightLyrics || song.highlightLyrics;
+  const currentAudioSrc = activeTrack?.audioSrc || song.audioSrc;
+
+  // Sync with Audio Provider
   useEffect(() => {
+    // If tracks exist and we have a current song in provider, sync active track
+    if (song.tracks && currentSong) {
+      const match = song.tracks.find(
+        (t) => t.audioSrc === currentSong.audioSrc,
+      );
+      if (match) setActiveTrack(match);
+    }
+  }, [currentSong, song.tracks]);
+
+  useEffect(() => {
+    // 자동 재생 로직: 앨범(tracks)이든 싱글이든 해당 페이지 진입 시 첫 곡 재생
     if (currentSong?.id !== song.id) {
-      playSong(song);
+      if (song.tracks && song.tracks.length > 0) {
+        const firstTrack = song.tracks[0];
+        playSong({
+          ...song,
+          title: firstTrack.title,
+          audioSrc: firstTrack.audioSrc,
+          highlightLyrics: firstTrack.highlightLyrics,
+        });
+        setActiveTrack(firstTrack);
+      } else {
+        playSong(song);
+      }
     }
   }, [song, playSong, currentSong?.id]);
 
@@ -53,11 +86,46 @@ export default function SongDetail({ song }: { song: Song }) {
     setIsRotating(isPlaying && currentSong?.id === song.id);
   }, [isPlaying, currentSong, song.id]);
 
-  const handleTogglePlay = async () => {
-    if (isPlaying && currentSong?.id === song.id) {
+  const handleTogglePlay = async (trackOverride?: Track) => {
+    const trackToPlay = trackOverride || activeTrack;
+
+    // 앨범 내 다른 트랙을 클릭했는지 확인
+    const isDifferentTrack =
+      trackOverride && currentSong?.audioSrc !== trackOverride.audioSrc;
+
+    if (
+      !isDifferentTrack &&
+      isPlaying &&
+      (currentSong?.audioSrc === trackToPlay?.audioSrc ||
+        currentSong?.id === song.id)
+    ) {
+      // 앨범 내 리스트 버튼 클릭 시 중지 기능 제거 (재생 중인 곡을 다시 누르면 아무 동작 안 함)
+      if (trackOverride) return;
+
+      // 메인 재생 버튼(하단 큰 버튼) 클릭 시에만 일시 정지 허용
       await pauseAudio();
     } else {
-      await playSong(song);
+      if (trackOverride && song.tracks) {
+        // 앨범 내 특정 트랙 실행
+        playSong({
+          ...song,
+          title: trackOverride.title,
+          audioSrc: trackOverride.audioSrc,
+          highlightLyrics: trackOverride.highlightLyrics,
+        });
+        setActiveTrack(trackOverride);
+      } else if (!trackOverride && activeTrack && song.tracks) {
+        // 메인 재생 버튼 클릭 시 현재 활성화된 트랙 재생
+        playSong({
+          ...song,
+          title: activeTrack.title,
+          audioSrc: activeTrack.audioSrc,
+          highlightLyrics: activeTrack.highlightLyrics,
+        });
+      } else {
+        // 싱글 곡 재생
+        playSong(song);
+      }
     }
   };
 
@@ -153,22 +221,99 @@ export default function SongDetail({ song }: { song: Song }) {
           </div>
 
           {/* Minimal Player Controls */}
-          <div className="text-center">
-            <h1 className="text-5xl font-light tracking-[0.2em] text-white uppercase mb-2">
-              {song.title}
+          <div className="text-center w-full max-w-md">
+            <h1 className="text-5xl font-light tracking-[0.2em] text-white uppercase mb-2 flex flex-col items-center gap-2">
+              <span>{currentDisplayTitle.split(" (feat.")[0]}</span>
+              {currentDisplayTitle.includes(" (feat.") && (
+                <span className="text-[10px] font-mono text-white/30 tracking-[0.4em] lowercase italic">
+                  feat.{" "}
+                  {currentDisplayTitle.split(" (feat.")[1].replace(")", "")}
+                </span>
+              )}
             </h1>
-            <p className="text-sm font-mono text-white/40 tracking-[0.3em] uppercase mb-10">
+            <p className="text-sm font-mono text-white/40 tracking-[0.3em] uppercase mb-8">
               {song.artist}
             </p>
 
+            {/* Album Tracklist Integration */}
+            {song.tracks && song.tracks.length > 1 && (
+              <div className="mb-12 flex flex-col gap-2 max-h-40 overflow-y-auto pr-2 custom-scrollbar">
+                {song.tracks.map((track) => {
+                  const isActive = currentSong?.audioSrc === track.audioSrc;
+                  return (
+                    <button
+                      key={track.id}
+                      onClick={() => handleTogglePlay(track)}
+                      className={`flex items-center justify-between px-6 py-3 rounded-full border transition-all duration-300 group/track ${
+                        isActive
+                          ? "bg-white/20 border-white text-white"
+                          : "bg-white/5 border-white/10 text-white/40 hover:bg-white/10 hover:border-white/20"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <MusicIcon
+                          size={12}
+                          className={
+                            isActive
+                              ? "animate-pulse"
+                              : "opacity-0 group-hover/track:opacity-50"
+                          }
+                        />
+                        <span className="text-[10px] font-mono uppercase tracking-widest flex items-center gap-2">
+                          {track.title}
+                          {(track.isTitle === "true" ||
+                            track.isTitle === true) && (
+                            <span className="px-1.5 py-0.5 rounded-sm bg-white/20 text-[7px] font-bold tracking-normal border border-white/20">
+                              TITLE
+                            </span>
+                          )}
+                        </span>
+                      </div>
+                      {isActive && isPlaying ? (
+                        <div className="flex gap-1 h-3 items-end">
+                          <motion.div
+                            animate={{ height: [4, 12, 6] }}
+                            transition={{ repeat: Infinity, duration: 0.5 }}
+                            className="w-[2px] bg-white"
+                          />
+                          <motion.div
+                            animate={{ height: [8, 4, 10] }}
+                            transition={{ repeat: Infinity, duration: 0.6 }}
+                            className="w-[2px] bg-white"
+                          />
+                          <motion.div
+                            animate={{ height: [6, 10, 4] }}
+                            transition={{ repeat: Infinity, duration: 0.7 }}
+                            className="w-[2px] bg-white"
+                          />
+                        </div>
+                      ) : (
+                        <PlayIcon
+                          size={12}
+                          fill="currentColor"
+                          className="opacity-0 group-hover/track:opacity-100 transition-opacity"
+                        />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
             <button
-              onClick={handleTogglePlay}
+              onClick={() => handleTogglePlay()}
               className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-2xl border border-white/40 text-white hover:bg-white hover:text-black hover:border-white transition-all duration-500 flex items-center justify-center group mx-auto shadow-[0_0_40px_rgba(0,0,0,0.3)] hover:shadow-[0_0_50px_rgba(255,255,255,0.2)]"
               aria-label={
-                isPlaying && currentSong?.id === song.id ? "Pause" : "Play"
+                isPlaying &&
+                (currentSong?.audioSrc === currentAudioSrc ||
+                  currentSong?.id === song.id)
+                  ? "Pause"
+                  : "Play"
               }
             >
-              {isPlaying && currentSong?.id === song.id ? (
+              {isPlaying &&
+              (currentSong?.audioSrc === currentAudioSrc ||
+                currentSong?.id === song.id) ? (
                 <PauseIcon size={32} fill="currentColor" />
               ) : (
                 <PlayIcon size={32} fill="currentColor" className="ml-1" />
@@ -234,7 +379,7 @@ export default function SongDetail({ song }: { song: Song }) {
             <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-[3px] bg-white/20 group-hover:w-24 group-hover:bg-white/40 transition-all duration-1000 ease-out" />
 
             <h2 className="text-4xl md:text-5xl font-light text-white text-center leading-relaxed tracking-tight max-w-2xl whitespace-pre-wrap drop-shadow-xl selection:bg-white selection:text-black mb-8">
-              {song.highlightLyrics}
+              {currentDisplayLyrics}
             </h2>
 
             <motion.div
@@ -242,11 +387,19 @@ export default function SongDetail({ song }: { song: Song }) {
               whileInView={{ opacity: 0.6 }}
               className="flex items-center gap-3 text-xs font-mono tracking-[0.2em] text-white/50 uppercase"
             >
-              <div className="w-4 h-[1px] bg-white/30" />
-              <span>
-                {song.title} — {song.artist}
+              <span className="flex items-center gap-1.5">
+                <span className="uppercase">
+                  {currentDisplayTitle.split(" (feat.")[0]}
+                </span>
+                {currentDisplayTitle.includes(" (feat.") && (
+                  <span className="text-[8px] opacity-60 lowercase italic">
+                    feat.{" "}
+                    {currentDisplayTitle.split(" (feat.")[1].replace(")", "")}
+                  </span>
+                )}
+                <span className="mx-1 opacity-40">—</span>
+                <span className="uppercase">{song.artist}</span>
               </span>
-              <div className="w-4 h-[1px] bg-white/30" />
             </motion.div>
           </div>
 

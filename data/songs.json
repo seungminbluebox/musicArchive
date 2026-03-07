@@ -1,6 +1,6 @@
 [
   {
-    "id": "1",
+    "id": "single-01",
     "title": "orange",
     "artist": "Coll!n",
     "themeBase": "#F4CCAC",
@@ -19,6 +19,33 @@
     ],
     "highlightLyrics": "오늘 처음으로 알게 됐어 난\n바다에도 별이 뜨구나\n네 눈을 보고 알게 됐어",
     "log": "들으면 여름이 생각나는 노래,\n여름이면 생각나는 노래",
-    "createdAt": "2026-03-01T10:00:00Z"
+    "createdAt": "2026-03-06T10:00:00Z"
+  },
+  {
+    "id": "album-01",
+    "title": "caroline",
+    "artist": "OVCOCO",
+    "themeBase": "#0F0510",
+    "themeSub": "#3D1B3E",
+    "themeAccent": "#FF2D55",
+    "themeText": "#F8F8FF",
+    "tracks": [
+      {
+        "id": "trk-1",
+        "title": "caroline",
+        "isTitle": "true",
+        "audioSrc": "/caroline-ovcoco/ovcoco-caroline.flac",
+        "highlightLyrics": "트랙 1의 강조 가사"
+      },
+      {
+        "id": "trk-2",
+        "title": "me&you (feat. jeebanoff)",
+        "audioSrc": "/caroline-ovcoco/ovcoco-me&you.flac",
+        "highlightLyrics": "트랙 2의 강조 가사"
+      }
+    ],
+    "images": ["/caroline-ovcoco/1.jpg"],
+    "log": "앨범 전체를 관통하는 큐레이터의 노트",
+    "createdAt": "2026-03-07T00:00:00Z"
   }
 ]
