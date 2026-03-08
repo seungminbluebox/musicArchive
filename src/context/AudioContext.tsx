@@ -76,10 +76,13 @@ export function AudioProvider({ children }: { children: ReactNode }) {
       await playPromiseRef.current;
       playPromiseRef.current = null;
     } catch (error: any) {
-      if (error.name !== "AbortError") {
+      if (error.name === "NotAllowedError") {
+        console.warn("Autoplay blocked: Waiting for user interaction");
+      } else if (error.name !== "AbortError") {
         console.error("Playback error:", error);
       }
       playPromiseRef.current = null;
+      setIsPlaying(false); // Playback failed, sync state
     }
   };
 

@@ -39,7 +39,7 @@ export default function RecordList({ songs }: { songs: Song[] }) {
             </div>
             <div
               className="mt-4 border-l-2 pl-3"
-              style={{ borderLeftColor: song.themeAccent }}
+              style={{ borderLeftColor: song.themeSub }}
             >
               <h3 className="text-lg font-bold leading-none mb-1 text-white">
                 {song.title}

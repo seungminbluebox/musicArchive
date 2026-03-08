@@ -60,5 +60,67 @@
     ],
     "log": "",
     "createdAt": "2026-03-07T00:00:00Z"
+  },
+  {
+    "id": "album-02",
+    "title": "ride on the wind",
+    "artist": "KARD",
+    "themeBase": "#8CC6EC",
+    "themeSub": "#E0F2F7",
+    "themeAccent": "#FF9A8B",
+    "themeText": "#1E3A5F",
+    "releaseDate": "2018-07-25",
+    "tracks": [
+      {
+        "id": "trk-1",
+        "title": "INTRO Humming",
+        "audioSrc": "/rideOnTheWind-kard/INTRO Humming - KARD.flac",
+        "highlightLyrics": ""
+      },
+      {
+        "id": "trk-2",
+        "title": "Moonlight",
+        "lyricsBy": "NASSUN, BM, J.seph, GR8MOON",
+        "audioSrc": "/rideOnTheWind-kard/Moonlight - KARD.flac",
+        "highlightLyrics": ""
+      },
+      {
+        "id": "trk-3",
+        "title": "Ride on the wind",
+        "isTitle": "true",
+        "lyricsBy": "NASSUN, BM, GR8MOON",
+        "audioSrc": "/rideOnTheWind-kard/Ride on the wind - KARD.flac",
+        "highlightLyrics": ""
+      },
+      {
+        "id": "trk-4",
+        "title": "Knockin' on my heaven's door",
+        "lyricsBy": "NASSUN, BM, J.seph, GR8MOON",
+        "audioSrc": "/rideOnTheWind-kard/Knockin' on my heaven's door - KARD.flac",
+        "highlightLyrics": ""
+      },
+      {
+        "id": "trk-5",
+        "title": "Dímelo",
+        "lyricsBy": "박정욱(MOT), 김준일(MOT), Blenn(MOT), BM, J.seph",
+        "audioSrc": "/rideOnTheWind-kard/Dímelo - KARD.flac",
+        "highlightLyrics": ""
+      },
+      {
+        "id": "trk-6",
+        "title": "Ride on the wind (Inst.)",
+        "audioSrc": "/rideOnTheWind-kard/Ride on the wind (Inst.) (Instrumental) - KARD.flac"
+      }
+    ],
+    "images": [
+      "/rideOnTheWind-kard/1.jpg",
+      "/rideOnTheWind-kard/2.jpg",
+      "/rideOnTheWind-kard/3.jpg",
+      "/rideOnTheWind-kard/7.jpg",
+      "/rideOnTheWind-kard/9.jpg",
+      "/rideOnTheWind-kard/8.jpg"
+    ],
+    "log": "",
+    "createdAt": "2026-03-08T16:17:00Z"
   }
 ]

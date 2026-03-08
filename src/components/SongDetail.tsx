@@ -65,46 +65,60 @@ export default function SongDetail({ song }: { song: Song }) {
 
   // Sync with Audio Provider
   useEffect(() => {
-    // If tracks exist and we have a current song in provider, sync active track
+    // 앨범 트랙이 있고 현재 재생 중인 곡이 이 앨범에 속해 있다면 activeTrack 동기화
     if (song.tracks && currentSong) {
-      const match = song.tracks.find(
-        (t) => t.audioSrc === currentSong.audioSrc,
-      );
-      if (match) setActiveTrack(match);
+      if (currentSong.id === song.id) {
+        const match = song.tracks.find(
+          (t) => t.audioSrc === currentSong.audioSrc,
+        );
+        if (match) setActiveTrack(match);
+      }
     }
-  }, [currentSong, song.tracks]);
+  }, [currentSong?.audioSrc, currentSong?.id, song.id, song.tracks]);
 
   useEffect(() => {
-    // 자동 재생 로직: 앨범(tracks)이든 싱글이든 해당 페이지 진입 시 첫 곡 재생
+    // 자동 설정 로직: 앨범 페이지 진입 시 해당 앨범 데이터로 초기화
+    // (사용자 클릭 전까지는 실제로 play()가 성공하지 않을 수 있으나 데이터 상태는 맞춰둠)
     if (currentSong?.id !== song.id) {
       if (song.tracks && song.tracks.length > 0) {
         const firstTrack = song.tracks[0];
+        setActiveTrack(firstTrack);
         playSong({
           ...song,
           title: firstTrack.title,
           audioSrc: firstTrack.audioSrc,
           highlightLyrics: firstTrack.highlightLyrics,
         });
-        setActiveTrack(firstTrack);
       } else {
         playSong(song);
       }
     }
-  }, [song, playSong, currentSong?.id]);
+  }, [song.id]); // song.id가 바뀔 때만 (페이지 이동 시) 실행
 
   useEffect(() => {
-    setIsRotating(isPlaying && currentSong?.id === song.id);
-  }, [isPlaying, currentSong, song.id]);
+    // LP 회전 상태 확인 로직 강화
+    const isCurrentSongMatching = currentSong?.id === song.id;
+    setIsRotating(isPlaying && isCurrentSongMatching);
+  }, [isPlaying, currentSong?.id, song.id]);
 
   // Handle auto-playing next track when current one ends
   useEffect(() => {
-    if (!isPlaying && progress === 0 && song.tracks && activeTrack) {
+    if (
+      !isPlaying &&
+      progress === 0 &&
+      song.tracks &&
+      activeTrack &&
+      currentSong?.id === song.id
+    ) {
       const currentIndex = song.tracks.findIndex(
         (t) => t.audioSrc === activeTrack.audioSrc,
       );
 
-      if (currentIndex !== -1 && currentIndex < song.tracks.length - 1) {
-        const nextTrack = song.tracks[currentIndex + 1];
+      if (
+        currentIndex !== -1 &&
+        currentIndex < (song.tracks?.length || 0) - 1
+      ) {
+        const nextTrack = (song.tracks as Track[])[currentIndex + 1];
         playSong({
           ...song,
           title: nextTrack.title,
@@ -114,38 +128,32 @@ export default function SongDetail({ song }: { song: Song }) {
         setActiveTrack(nextTrack);
       }
     }
-  }, [isPlaying, progress, song.tracks, activeTrack, song, playSong]);
+  }, [isPlaying, progress, currentSong?.id, song.id]);
 
   const handleTogglePlay = async (trackOverride?: Track) => {
-    const trackToPlay = trackOverride || activeTrack;
+    const trackToPlay =
+      trackOverride || activeTrack || (song.tracks ? song.tracks[0] : null);
 
-    // 앨범 내 다른 트랙을 클릭했는지 확인
-    const isDifferentTrack =
-      trackOverride && currentSong?.audioSrc !== trackOverride.audioSrc;
+    // 만약 현재 재생 중인 곡이 이 곡/트랙과 같다면 토글(재생/정지)
+    const isSameAudio =
+      currentSong?.audioSrc === (trackOverride?.audioSrc || currentAudioSrc);
+    const isSameId = currentSong?.id === song.id;
 
-    if (
-      !isDifferentTrack &&
-      isPlaying &&
-      (currentSong?.audioSrc === trackToPlay?.audioSrc ||
-        currentSong?.id === song.id)
-    ) {
+    if (isPlaying && isSameId && isSameAudio) {
       // 앨범 내 리스트 버튼 클릭 시 중지 기능 제거 (재생 중인 곡을 다시 누르면 아무 동작 안 함)
       if (trackOverride) return;
-
-      // 메인 재생 버튼(하단 큰 버튼) 클릭 시에만 일시 정지 허용
       await pauseAudio();
     } else {
-      if (trackOverride && song.tracks) {
-        // 앨범 내 특정 트랙 실행
+      // 새로운 곡 또는 트랙 재생
+      if (trackOverride) {
+        setActiveTrack(trackOverride);
         playSong({
           ...song,
           title: trackOverride.title,
           audioSrc: trackOverride.audioSrc,
           highlightLyrics: trackOverride.highlightLyrics,
         });
-        setActiveTrack(trackOverride);
-      } else if (!trackOverride && activeTrack && song.tracks) {
-        // 메인 재생 버튼 클릭 시 현재 활성화된 트랙 재생
+      } else if (activeTrack) {
         playSong({
           ...song,
           title: activeTrack.title,
@@ -153,7 +161,6 @@ export default function SongDetail({ song }: { song: Song }) {
           highlightLyrics: activeTrack.highlightLyrics,
         });
       } else {
-        // 싱글 곡 재생
         playSong(song);
       }
     }
@@ -199,10 +206,10 @@ export default function SongDetail({ song }: { song: Song }) {
       <section className="relative h-screen w-full flex items-center justify-center z-20">
         <motion.div
           style={{ opacity: heroOpacity, y: heroY }}
-          className="w-full max-w-6xl flex flex-col items-center px-8"
+          className="w-full max-w-6xl flex flex-col md:flex-row items-center justify-center gap-12 md:gap-24 px-8"
         >
-          {/* LP Visuals - Centered and Elegant */}
-          <div className="relative w-72 md:w-96 aspect-square mb-12 flex items-center justify-center">
+          {/* LP Visuals - Left Side on Desktop */}
+          <div className="relative w-72 md:w-96 aspect-square flex items-center justify-center flex-shrink-0">
             <motion.div
               className="absolute w-[95%] aspect-square rounded-full bg-[#0a0a0a] shadow-[0_0_50px_rgba(0,0,0,0.5)] flex items-center justify-center border-[1px] border-white/5"
               animate={{
@@ -381,9 +388,9 @@ export default function SongDetail({ song }: { song: Song }) {
             </motion.div>
           </div>
 
-          {/* Minimal Player Controls */}
-          <div className="text-center w-full max-w-md">
-            <h1 className="text-5xl font-light tracking-[0.2em] text-white uppercase mb-2 flex flex-col items-center gap-2">
+          {/* Minimal Player Controls - Right Side on Desktop */}
+          <div className="text-center md:text-left w-full max-w-md flex flex-col justify-center ml-30">
+            <h1 className="text-5xl font-light tracking-[0.2em] text-white uppercase mb-4 flex flex-col items-center md:items-start gap-2">
               <span>{currentDisplayTitle.split(" (feat.")[0]}</span>
               {currentDisplayTitle.includes(" (feat.") && (
                 <span className="text-[10px] font-mono text-white/30 tracking-[0.4em] lowercase italic">
@@ -398,7 +405,7 @@ export default function SongDetail({ song }: { song: Song }) {
 
             {/* Album Tracklist Integration */}
             {song.tracks && song.tracks.length > 1 && (
-              <div className="mb-12 flex flex-col gap-2 max-h-40 overflow-y-auto pr-2 custom-scrollbar">
+              <div className="mb-12 flex flex-col gap-2 max-h-48 overflow-y-auto pr-4 scroll-smooth">
                 {song.tracks.map((track) => {
                   const isActive = currentSong?.audioSrc === track.audioSrc;
                   return (
@@ -461,25 +468,27 @@ export default function SongDetail({ song }: { song: Song }) {
               </div>
             )}
 
-            <button
-              onClick={() => handleTogglePlay()}
-              className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-2xl border border-white/40 text-white hover:bg-white hover:text-black hover:border-white transition-all duration-500 flex items-center justify-center group mx-auto shadow-[0_0_40px_rgba(0,0,0,0.3)] hover:shadow-[0_0_50px_rgba(255,255,255,0.2)]"
-              aria-label={
-                isPlaying &&
+            <div className="flex justify-center md:justify-start">
+              <button
+                onClick={() => handleTogglePlay()}
+                className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-2xl border border-white/40 text-white hover:bg-white hover:text-black hover:border-white transition-all duration-500 flex items-center justify-center group shadow-[0_0_40px_rgba(0,0,0,0.3)] hover:shadow-[0_0_50px_rgba(255,255,255,0.2)]"
+                aria-label={
+                  isPlaying &&
+                  (currentSong?.audioSrc === currentAudioSrc ||
+                    currentSong?.id === song.id)
+                    ? "Pause"
+                    : "Play"
+                }
+              >
+                {isPlaying &&
                 (currentSong?.audioSrc === currentAudioSrc ||
-                  currentSong?.id === song.id)
-                  ? "Pause"
-                  : "Play"
-              }
-            >
-              {isPlaying &&
-              (currentSong?.audioSrc === currentAudioSrc ||
-                currentSong?.id === song.id) ? (
-                <PauseIcon size={32} fill="currentColor" />
-              ) : (
-                <PlayIcon size={32} fill="currentColor" className="ml-1" />
-              )}
-            </button>
+                  currentSong?.id === song.id) ? (
+                  <PauseIcon size={32} fill="currentColor" />
+                ) : (
+                  <PlayIcon size={32} fill="currentColor" className="ml-1" />
+                )}
+              </button>
+            </div>
           </div>
         </motion.div>
       </section>
@@ -603,10 +612,12 @@ export default function SongDetail({ song }: { song: Song }) {
               whileInView={{ opacity: 1, y: 0 }}
               className="flex flex-col gap-8 text-xs font-mono text-white/40 leading-relaxed uppercase tracking-widest"
             >
-              <div>
-                <span className="text-white/80 block mb-1">Lyrics by</span>
-                {activeTrack?.lyricsBy || song.lyricsBy || song.artist}
-              </div>
+              {(activeTrack?.lyricsBy || song.lyricsBy) && (
+                <div>
+                  <span className="text-white/80 block mb-1">Lyrics by</span>
+                  {activeTrack?.lyricsBy || song.lyricsBy}
+                </div>
+              )}
 
               <div>
                 <span className="text-white/80 block mb-1">Theme Palette</span>
