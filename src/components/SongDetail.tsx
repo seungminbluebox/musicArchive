@@ -16,12 +16,22 @@ import { useAudio } from "@/context/AudioContext";
 import { Song, Track } from "@/types/song";
 
 export default function SongDetail({ song }: { song: Song }) {
-  const { currentSong, isPlaying, playSong, pauseAudio, progress } = useAudio();
+  const { currentSong, isPlaying, playSong, pauseAudio, progress, duration } =
+    useAudio();
   const [isRotating, setIsRotating] = useState(false);
   const [activeTrack, setActiveTrack] = useState<Track | null>(
     song.tracks?.[0] || null,
   );
+  const [showTag, setShowTag] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Function to format seconds to mm:ss
+  const formatTime = (seconds: number) => {
+    if (isNaN(seconds)) return "0:00";
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
 
   // 1. Scroll Progress Tracking
   const { scrollYProgress } = useScroll({
@@ -85,6 +95,26 @@ export default function SongDetail({ song }: { song: Song }) {
   useEffect(() => {
     setIsRotating(isPlaying && currentSong?.id === song.id);
   }, [isPlaying, currentSong, song.id]);
+
+  // Handle auto-playing next track when current one ends
+  useEffect(() => {
+    if (!isPlaying && progress === 0 && song.tracks && activeTrack) {
+      const currentIndex = song.tracks.findIndex(
+        (t) => t.audioSrc === activeTrack.audioSrc,
+      );
+
+      if (currentIndex !== -1 && currentIndex < song.tracks.length - 1) {
+        const nextTrack = song.tracks[currentIndex + 1];
+        playSong({
+          ...song,
+          title: nextTrack.title,
+          audioSrc: nextTrack.audioSrc,
+          highlightLyrics: nextTrack.highlightLyrics,
+        });
+        setActiveTrack(nextTrack);
+      }
+    }
+  }, [isPlaying, progress, song.tracks, activeTrack, song, playSong]);
 
   const handleTogglePlay = async (trackOverride?: Track) => {
     const trackToPlay = trackOverride || activeTrack;
@@ -206,17 +236,141 @@ export default function SongDetail({ song }: { song: Song }) {
 
             <motion.div
               layoutId={`image-${song.id}`}
-              className="relative w-full aspect-square bg-neutral-900 shadow-2xl z-20 rounded-sm overflow-hidden"
+              className="relative w-full aspect-square bg-neutral-900 shadow-2xl z-20 rounded-sm cursor-pointer group/cover"
+              onClick={() => setShowTag(!showTag)}
             >
-              {song.images?.[0] && (
-                <Image
-                  src={song.images[0]}
-                  alt={song.title}
-                  fill
-                  className="object-cover"
-                  priority
-                />
-              )}
+              <div className="relative w-full h-full overflow-hidden rounded-sm">
+                {song.images?.[0] && (
+                  <Image
+                    src={song.images[0]}
+                    alt={song.title}
+                    fill
+                    className="object-cover transition-transform duration-700 group-hover/cover:scale-105"
+                    priority
+                  />
+                )}
+              </div>
+
+              {/* LP Paper Tag (Physical Texture Feel) */}
+              <motion.div
+                initial={{ opacity: 0, x: -40, rotate: -5 }}
+                animate={{
+                  opacity: showTag ? 1 : 0,
+                  x: showTag ? -30 : -40,
+                  rotate: showTag ? -2 : -5,
+                }}
+                className="absolute top-10 -left-16 z-30 pointer-events-none origin-right"
+              >
+                <div
+                  className="relative p-5 shadow-[5px_5px_20px_rgba(0,0,0,0.4)] min-w-[140px] before:absolute before:inset-0 before:bg-[url('https://www.transparenttextures.com/patterns/paper-fibers.png')] before:opacity-10"
+                  style={{
+                    backgroundColor: song.themeSub,
+                    color: song.themeText,
+                    border: `1px solid ${song.themeAccent}44`,
+                  }}
+                >
+                  {/* String/Hole Visual */}
+                  <div
+                    className="absolute top-1/2 -right-1 w-2 h-2 rounded-full shadow-inner"
+                    style={{ backgroundColor: `${song.themeText}22` }}
+                  />
+
+                  <div className="relative z-10 font-mono space-y-4">
+                    <div
+                      className="border-b pb-1"
+                      style={{ borderBottomColor: `${song.themeText}22` }}
+                    >
+                      <span
+                        className="text-[7px] block uppercase leading-none mb-1 opacity-50"
+                        style={{ color: song.themeText }}
+                      >
+                        Catalog No.
+                      </span>
+                      <span className="text-[10px] font-bold tracking-tighter">
+                        {song.id.toUpperCase()}
+                        {activeTrack && (
+                          <span className="opacity-50">
+                            -
+                            {(
+                              song.tracks?.findIndex(
+                                (t) => t.id === activeTrack.id,
+                              ) ?? 0 + 1
+                            )
+                              .toString()
+                              .padStart(2, "0")}
+                          </span>
+                        )}
+                      </span>
+                    </div>
+
+                    <div>
+                      <span
+                        className="text-[7px] block uppercase leading-none mb-1 opacity-50"
+                        style={{ color: song.themeText }}
+                      >
+                        Release Date
+                      </span>
+                      <span className="text-[10px] font-bold tracking-widest">
+                        {song.releaseDate ||
+                          new Date(song.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+
+                    <div>
+                      <span
+                        className="text-[7px] block uppercase leading-none mb-1 opacity-50"
+                        style={{ color: song.themeText }}
+                      >
+                        Length
+                      </span>
+                      <span
+                        className="text-[11px] font-black border px-1.5 py-0.5 inline-block mt-1"
+                        style={{
+                          borderColor: song.themeText,
+                          backgroundColor: `${song.themeAccent}33`,
+                        }}
+                      >
+                        {currentSong?.audioSrc ===
+                        (activeTrack?.audioSrc || song.audioSrc)
+                          ? formatTime(duration)
+                          : song.duration || "--:--"}
+                      </span>
+                    </div>
+
+                    <div className="pt-2">
+                      <div
+                        className="w-full h-4 opacity-30"
+                        style={{
+                          background: `repeating-linear-gradient(90deg, ${song.themeText}, ${song.themeText} 1px, transparent 1px, transparent 3px)`,
+                        }}
+                      />
+                      <span
+                        className="text-[6px] uppercase mt-1 block opacity-40"
+                        style={{ color: song.themeText }}
+                      >
+                        Archived Object
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Red "Checked" Stamp Effect */}
+                  <div
+                    className="absolute -bottom-2 -right-2 w-10 h-10 border-2 rounded-full flex items-center justify-center rotate-12 font-black text-[8px] uppercase opacity-60"
+                    style={{
+                      borderColor: song.themeAccent,
+                      color: song.themeAccent,
+                      filter: "drop-shadow(0 0 2px rgba(0,0,0,0.5))",
+                    }}
+                  >
+                    Verified
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Interaction Hint */}
+              <div className="absolute bottom-4 right-4 opacity-0 group-hover/cover:opacity-100 transition-opacity bg-black/40 backdrop-blur-md px-2 py-1 rounded-sm border border-white/10 text-[8px] font-mono text-white/80 tracking-tighter">
+                TOUCH TO INSPECT
+              </div>
             </motion.div>
           </div>
 
@@ -344,6 +498,7 @@ export default function SongDetail({ song }: { song: Song }) {
               const layoutClass = layouts[seed % layouts.length];
               const zIndex = 10 + index;
               const yOffset = (seed % 100) - 50; // -50px to 50px jitter
+              const isVideo = img.toLowerCase().match(/\.(mp4|webm|ogg|mov)$/);
 
               return (
                 <motion.div
@@ -359,12 +514,23 @@ export default function SongDetail({ song }: { song: Song }) {
                   className={`relative aspect-[4/5] overflow-hidden shadow-2xl mb-24 transition-transform duration-700 hover:scale-[1.02] ${layoutClass}`}
                   style={{ zIndex, marginTop: `${yOffset}px` }}
                 >
-                  <Image
-                    src={img}
-                    alt={`Detail ${index}`}
-                    fill
-                    className="object-cover"
-                  />
+                  {isVideo ? (
+                    <video
+                      src={img}
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <Image
+                      src={img}
+                      alt={`Detail ${index}`}
+                      fill
+                      className="object-cover"
+                    />
+                  )}
                   {/* Subtle glass overlay for texture */}
                   <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent pointer-events-none" />
                 </motion.div>
@@ -372,61 +538,103 @@ export default function SongDetail({ song }: { song: Song }) {
             })}
           </div>
 
-          {/* 2. Highlighted Lyrics (MIDDLE) */}
-          <div className="flex flex-col items-center py-24 relative group">
-            {/* Minimalist Accents: Top and Bottom floating lines */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-[3px] bg-white/20 group-hover:w-24 group-hover:bg-white/40 transition-all duration-1000 ease-out" />
-            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-[3px] bg-white/20 group-hover:w-24 group-hover:bg-white/40 transition-all duration-1000 ease-out" />
+          {/* 2. Highlighted Lyrics (MIDDLE) - Only shows if content exists */}
+          {currentDisplayLyrics && currentDisplayLyrics.trim() !== "" && (
+            <div className="flex flex-col items-center py-24 relative group">
+              {/* Minimalist Accents: Top and Bottom floating lines */}
+              <div
+                className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-[3px] group-hover:w-24 transition-all duration-1000 ease-out"
+                style={{ backgroundColor: `${song.themeText}33` }}
+              />
+              <div
+                className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-[3px] group-hover:w-24 transition-all duration-1000 ease-out"
+                style={{ backgroundColor: `${song.themeText}33` }}
+              />
 
-            <h2 className="text-4xl md:text-5xl font-light text-white text-center leading-relaxed tracking-tight max-w-2xl whitespace-pre-wrap drop-shadow-xl selection:bg-white selection:text-black mb-8">
-              {currentDisplayLyrics}
-            </h2>
+              <h2
+                className="text-4xl md:text-5xl font-light text-center leading-relaxed tracking-tight max-w-2xl whitespace-pre-wrap drop-shadow-xl selection:bg-white selection:text-black mb-8"
+                style={{ color: song.themeText }}
+              >
+                {currentDisplayLyrics}
+              </h2>
 
-            <motion.div
-              initial={{ opacity: 0.3 }}
-              whileInView={{ opacity: 0.6 }}
-              className="flex items-center gap-3 text-xs font-mono tracking-[0.2em] text-white/50 uppercase"
-            >
-              <span className="flex items-center gap-1.5">
-                <span className="uppercase">
-                  {currentDisplayTitle.split(" (feat.")[0]}
-                </span>
-                {currentDisplayTitle.includes(" (feat.") && (
-                  <span className="text-[8px] opacity-60 lowercase italic">
-                    feat.{" "}
-                    {currentDisplayTitle.split(" (feat.")[1].replace(")", "")}
+              <motion.div
+                initial={{ opacity: 0.3 }}
+                whileInView={{ opacity: 0.6 }}
+                className="flex items-center gap-3 text-xs font-mono tracking-[0.2em] uppercase"
+                style={{ color: song.themeText }}
+              >
+                <div
+                  className="w-4 h-[1px]"
+                  style={{ backgroundColor: `${song.themeText}33` }}
+                />
+                <span className="flex items-center gap-1.5">
+                  <span className="uppercase opacity-70">
+                    {currentDisplayTitle.split(" (feat.")[0]}
                   </span>
-                )}
-                <span className="mx-1 opacity-40">—</span>
-                <span className="uppercase">{song.artist}</span>
-              </span>
-            </motion.div>
-          </div>
+                  {currentDisplayTitle.includes(" (feat.") && (
+                    <span className="text-[8px] opacity-40 lowercase italic">
+                      feat.{" "}
+                      {currentDisplayTitle.split(" (feat.")[1].replace(")", "")}
+                    </span>
+                  )}
+                  <span className="mx-1 opacity-20">—</span>
+                  <span className="uppercase opacity-70">{song.artist}</span>
+                </span>
+                <div
+                  className="w-4 h-[1px]"
+                  style={{ backgroundColor: `${song.themeText}33` }}
+                />
+              </motion.div>
+            </div>
+          )}
 
           {/* 3. Credits & Info Row (BOTTOM) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-20 mb-20">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-24 mb-20 items-start border-t border-white/5 pt-12">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              className="flex flex-col gap-4 text-xs font-mono text-white/40 leading-relaxed uppercase tracking-widest"
+              className="flex flex-col gap-8 text-xs font-mono text-white/40 leading-relaxed uppercase tracking-widest"
             >
               <div>
                 <span className="text-white/80 block mb-1">Lyrics by</span>
-                {song.artist}
+                {activeTrack?.lyricsBy || song.lyricsBy || song.artist}
               </div>
+
               <div>
-                <span className="text-white/80 block mb-1">Theme</span>
-                {song.themeBase} / {song.themeAccent}
+                <span className="text-white/80 block mb-1">Theme Palette</span>
+                <div className="flex flex-col gap-2 mt-3">
+                  {[
+                    { label: "Base", color: song.themeBase },
+                    { label: "Sub", color: song.themeSub },
+                    { label: "Accent", color: song.themeAccent },
+                  ].map((item) => (
+                    <div key={item.label} className="flex items-center gap-3">
+                      <div className="relative group/color">
+                        <div
+                          className="w-12 h-3 rounded-sm border border-white/20 shadow-[0_0_10px_rgba(0,0,0,0.3)] transition-all group-hover/color:w-16 group-hover/color:brightness-110"
+                          style={{ backgroundColor: item.color }}
+                        />
+                      </div>
+                      <span className="text-[9px] text-white/40 font-mono tracking-tighter">
+                        {item.color.toUpperCase()}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </motion.div>
 
-            {/* LOG / CURATOR NOTE */}
-            <motion.div
-              style={{ opacity: logOpacity, y: logY }}
-              className="text-lg text-white/70 leading-relaxed font-serif italic whitespace-pre-wrap"
-            >
-              "{song.log}"
-            </motion.div>
+            {/* Log / Curator Note */}
+            {song.log && song.log.trim() !== "" && (
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                className="text-lg text-white/70 leading-relaxed font-serif italic whitespace-pre-wrap border-l border-white/10 pl-12"
+              >
+                "{song.log}"
+              </motion.div>
+            )}
           </div>
         </div>
       </div>

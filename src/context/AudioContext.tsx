@@ -14,6 +14,7 @@ interface AudioContextType {
   currentSong: Song | null;
   isPlaying: boolean;
   progress: number;
+  duration: number; // New field for raw duration in seconds
   playSong: (song: Song) => Promise<void>;
   pauseAudio: () => Promise<void>;
   resumeAudio: () => Promise<void>;
@@ -26,6 +27,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   const [currentSong, setCurrentSong] = useState<Song | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [duration, setDuration] = useState(0);
   const audioObjectRef = useRef<HTMLAudioElement | null>(null);
   const fadeIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const playPromiseRef = useRef<Promise<void> | null>(null);
@@ -45,16 +47,24 @@ export function AudioProvider({ children }: { children: ReactNode }) {
         }
       };
 
+      const handleLoadedMetadata = () => {
+        if (audio.duration) {
+          setDuration(audio.duration);
+        }
+      };
+
       const handleEnded = () => {
         setIsPlaying(false);
         setProgress(0);
       };
 
       audio.addEventListener("timeupdate", updateProgress);
+      audio.addEventListener("loadedmetadata", handleLoadedMetadata);
       audio.addEventListener("ended", handleEnded);
 
       return () => {
         audio.removeEventListener("timeupdate", updateProgress);
+        audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
         audio.removeEventListener("ended", handleEnded);
       };
     }
@@ -176,6 +186,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
         currentSong,
         isPlaying,
         progress,
+        duration,
         playSong,
         pauseAudio,
         resumeAudio,

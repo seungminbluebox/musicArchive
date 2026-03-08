@@ -84,9 +84,22 @@ src/
   "themeAccent": "#D1603D",
   "themeText": "#FFFFFF",
   "audioSrc": "/audio/orange.flac",
-  "images": ["/img/1.jpg", "/img/2.jpg", "/img/3.jpg"],
-  "highlightLyrics": "가사 내용...",
-  "log": "곡에 대한 큐레이터의 노트",
+  "images": [
+    "/img/cover.jpg",
+    "/video/ambient.mp4", // GIF처럼 무한 반복되는 저소음 영상 지원
+    "/img/detail.jpg"
+  ],
+  "metadata": {
+    // 📂 Technical Metadata (Optional)
+    "duration": "03:45",
+    "format": "FLATE",
+    "bitrate": "24bit/48kHz",
+    "label": "Independent",
+    "releaseDate": "2024-05-20"
+  },
+  "highlightLyrics": "가사 내용...", // Optional: 곡의 핵심 가사 (없으면 섹션 숨김)
+  "lyricsBy": "작사가 이름",
+  "log": "곡에 대한 큐레이터의 노트", // Optional: 곡에 대한 설명 (없으면 섹션 숨김)
   "createdAt": "2026-03-07T00:00:00Z"
 }
 ```
@@ -108,18 +121,21 @@ src/
     {
       "id": "trk-1",
       "title": "orange",
+      "isTitle": "true",
       "audioSrc": "/audio/orange.flac",
-      "highlightLyrics": "트랙 1의 강조 가사"
+      "highlightLyrics": "트랙 1의 강조 가사", // Optional
+      "lyricsBy": "트랙 1 작사가"
     },
     {
       "id": "trk-2",
       "title": "blue",
       "audioSrc": "/audio/blue.mp3",
-      "highlightLyrics": "트랙 2의 강조 가사"
+      "highlightLyrics": "트랙 2의 강조 가사", // Optional
+      "lyricsBy": "트랙 2 작사가"
     }
   ],
   "images": ["/img/1.jpg", "/img/2.jpg"],
-  "log": "앨범 전체를 관통하는 큐레이터의 노트",
+  "log": "앨범 전체를 관통하는 큐레이터의 노트", // Optional
   "createdAt": "2026-03-07T00:00:00Z"
 }
 ```
