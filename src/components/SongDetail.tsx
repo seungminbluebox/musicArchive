@@ -389,85 +389,93 @@ export default function SongDetail({ song }: { song: Song }) {
           </div>
 
           {/* Minimal Player Controls - Right Side on Desktop */}
-          <div className="text-center md:text-left w-full max-w-md flex flex-col justify-center ml-30">
-            <h1 className="text-5xl font-light tracking-[0.2em] text-white uppercase mb-4 flex flex-col items-center md:items-start gap-2">
-              <span>{currentDisplayTitle.split(" (feat.")[0]}</span>
-              {currentDisplayTitle.includes(" (feat.") && (
-                <span className="text-[10px] font-mono text-white/30 tracking-[0.4em] lowercase italic">
-                  feat.{" "}
-                  {currentDisplayTitle.split(" (feat.")[1].replace(")", "")}
+          <div className="text-center md:text-left w-full max-w-md flex flex-col justify-start min-h-[520px] ml-30">
+            {/* 1. 최소 높이를 유지하며 내용에 따라 늘어나는 제목 섹션 */}
+            <div className="min-h-40 flex flex-col justify-end mb-6">
+              <h1 className="text-5xl font-light tracking-[0.2em] text-white uppercase flex flex-col items-center md:items-start gap-3">
+                <span className="w-full block leading-[1.2] break-keep">
+                  {currentDisplayTitle.split(" (feat.")[0]}
                 </span>
-              )}
-            </h1>
-            <p className="text-sm font-mono text-white/40 tracking-[0.3em] uppercase mb-8">
-              {song.artist}
-            </p>
+                {currentDisplayTitle.includes(" (feat.") && (
+                  <span className="text-[12px] font-mono text-white/30 tracking-[0.4em] lowercase italic">
+                    feat.{" "}
+                    {currentDisplayTitle.split(" (feat.")[1].replace(")", "")}
+                  </span>
+                )}
+              </h1>
+              <p className="text-sm font-mono text-white/40 tracking-[0.3em] uppercase mt-4">
+                {song.artist}
+              </p>
+            </div>
 
-            {/* Album Tracklist Integration */}
-            {song.tracks && song.tracks.length > 1 && (
-              <div className="mb-12 flex flex-col gap-2 max-h-48 overflow-y-auto pr-4 scroll-smooth">
-                {song.tracks.map((track) => {
-                  const isActive = currentSong?.audioSrc === track.audioSrc;
-                  return (
-                    <button
-                      key={track.id}
-                      onClick={() => handleTogglePlay(track)}
-                      className={`flex items-center justify-between px-6 py-3 rounded-full border transition-all duration-300 group/track ${
-                        isActive
-                          ? "bg-white/20 border-white text-white"
-                          : "bg-white/5 border-white/10 text-white/40 hover:bg-white/10 hover:border-white/20"
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <MusicIcon
-                          size={12}
-                          className={
-                            isActive
-                              ? "animate-pulse"
-                              : "opacity-0 group-hover/track:opacity-50"
-                          }
-                        />
-                        <span className="text-[10px] font-mono uppercase tracking-widest flex items-center gap-2">
-                          {track.title}
-                          {(track.isTitle === "true" ||
-                            track.isTitle === true) && (
-                            <span className="px-1.5 py-0.5 rounded-sm bg-white/20 text-[7px] font-bold tracking-normal border border-white/20">
-                              TITLE
-                            </span>
-                          )}
-                        </span>
-                      </div>
-                      {isActive && isPlaying ? (
-                        <div className="flex gap-1 h-3 items-end">
-                          <motion.div
-                            animate={{ height: [4, 12, 6] }}
-                            transition={{ repeat: Infinity, duration: 0.5 }}
-                            className="w-[2px] bg-white"
+            {/* 2. 고정 높이의 트랙리스트 섹션 */}
+            <div className="h-64 flex flex-col mb-8">
+              {song.tracks && song.tracks.length > 1 && (
+                <div className="flex flex-col gap-2 overflow-y-auto pr-4 scroll-smooth scrollbar-thin scrollbar-thumb-white/10">
+                  {song.tracks.map((track) => {
+                    const isActive = currentSong?.audioSrc === track.audioSrc;
+                    return (
+                      <button
+                        key={track.id}
+                        onClick={() => handleTogglePlay(track)}
+                        className={`flex items-center justify-between px-6 py-3 rounded-full border transition-all duration-300 group/track w-full flex-shrink-0 ${
+                          isActive
+                            ? "bg-white/20 border-white text-white"
+                            : "bg-white/5 border-white/10 text-white/40 hover:bg-white/10 hover:border-white/20"
+                        }`}
+                      >
+                        <div className="flex items-center gap-3 overflow-hidden mr-2">
+                          <MusicIcon
+                            size={12}
+                            className={`flex-shrink-0 ${
+                              isActive
+                                ? "animate-pulse"
+                                : "opacity-0 group-hover/track:opacity-50"
+                            }`}
                           />
-                          <motion.div
-                            animate={{ height: [8, 4, 10] }}
-                            transition={{ repeat: Infinity, duration: 0.6 }}
-                            className="w-[2px] bg-white"
-                          />
-                          <motion.div
-                            animate={{ height: [6, 10, 4] }}
-                            transition={{ repeat: Infinity, duration: 0.7 }}
-                            className="w-[2px] bg-white"
-                          />
+                          <span className="text-[10px] font-mono uppercase tracking-widest flex items-center gap-2 truncate">
+                            <span className="truncate">{track.title}</span>
+                            {(track.isTitle === "true" ||
+                              track.isTitle === true) && (
+                              <span className="flex-shrink-0 px-1.5 py-0.5 rounded-sm bg-white/20 text-[7px] font-bold tracking-normal border border-white/20">
+                                TITLE
+                              </span>
+                            )}
+                          </span>
                         </div>
-                      ) : (
-                        <PlayIcon
-                          size={12}
-                          fill="currentColor"
-                          className="opacity-0 group-hover/track:opacity-100 transition-opacity"
-                        />
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
+                        {isActive && isPlaying ? (
+                          <div className="flex gap-1 h-3 items-end flex-shrink-0">
+                            <motion.div
+                              animate={{ height: [4, 12, 6] }}
+                              transition={{ repeat: Infinity, duration: 0.5 }}
+                              className="w-[2px] bg-white"
+                            />
+                            <motion.div
+                              animate={{ height: [8, 4, 10] }}
+                              transition={{ repeat: Infinity, duration: 0.6 }}
+                              className="w-[2px] bg-white"
+                            />
+                            <motion.div
+                              animate={{ height: [6, 10, 4] }}
+                              transition={{ repeat: Infinity, duration: 0.7 }}
+                              className="w-[2px] bg-white"
+                            />
+                          </div>
+                        ) : (
+                          <PlayIcon
+                            size={12}
+                            fill="currentColor"
+                            className="opacity-0 group-hover/track:opacity-100 transition-opacity flex-shrink-0"
+                          />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
 
+            {/* 3. 재생 버튼 섹션 */}
             <div className="flex justify-center md:justify-start">
               <button
                 onClick={() => handleTogglePlay()}
