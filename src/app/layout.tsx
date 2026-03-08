@@ -8,8 +8,12 @@ import Link from "next/link";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Digital Record Shop",
-  description: "A curated collection of digital vinyls",
+  title: "Music Archive",
+  description: "A curated digital music collection",
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/icon.png",
+  },
 };
 
 export default function RootLayout({

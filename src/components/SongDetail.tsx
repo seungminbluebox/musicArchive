@@ -181,7 +181,14 @@ export default function SongDetail({ song }: { song: Song }) {
       {/* 2. FIXED HEADER/NAVIGATION */}
       <div className="fixed top-8 left-8 z-50 flex flex-col gap-6">
         <Link href="/" className="flex items-center gap-4 group">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-orange-500 to-purple-600 opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300" />
+          <div className="relative w-8 h-8 group-hover:scale-110 transition-transform duration-300">
+            <Image
+              src="/icon.png"
+              alt="MusicArchive Logo"
+              fill
+              className="object-contain"
+            />
+          </div>
           <h1 className="text-xl font-black uppercase tracking-tighter text-white/50 group-hover:text-white transition-colors">
             Music<span className="text-neutral-500">Archive</span>
           </h1>

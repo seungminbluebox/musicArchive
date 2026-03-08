@@ -1,5 +1,6 @@
 ﻿import { getSongs } from "@/lib/songs";
 import RecordList from "@/components/RecordList";
+import Image from "next/image";
 
 export default function Home() {
   const songs = getSongs();
@@ -7,9 +8,16 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-black text-white px-8">
       <header className="py-9 flex flex-col md:flex-row justify-between items-center border-b border-neutral-800/50">
-        <a className="flex items-center gap-4" href="/">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-orange-500 to-purple-600 animate-pulse"></div>
-          <h1 className="text-xl font-black uppercase tracking-tighter">
+        <a className="flex items-center gap-4 group" href="/">
+          <div className="relative w-8 h-8 group-hover:scale-110 transition-transform duration-300">
+            <Image
+              src="/icon.png"
+              alt="MusicArchive Logo"
+              fill
+              className="object-contain"
+            />
+          </div>
+          <h1 className="text-xl font-black uppercase tracking-tighter group-hover:text-neutral-300 transition-colors">
             Music<span className="text-neutral-500">Archive</span>
           </h1>
         </a>
