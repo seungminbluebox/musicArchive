@@ -122,5 +122,34 @@
     ],
     "log": "KARD가 다시 \n들고 와줬으면 하는 컨셉의 앨범",
     "createdAt": "2026-03-08T16:17:00Z"
+  },
+  {
+    "id": "single-02",
+    "title": "hollywood",
+    "artist": "검정치마",
+    "themeBase": "#E67E6B",
+    "themeSub": "#1C6B75",
+    "themeAccent": "#FF4D80",
+    "themeText": "#EBE8E0",
+    "audioSrc": "/hollywood-blackSkirt/hollywood-blackSkirt.flac",
+    "images": [
+      "/hollywood-blackSkirt/1.jpg",
+      "/hollywood-blackSkirt/3.jpg",
+      "/hollywood-blackSkirt/4.jpg",
+      "/hollywood-blackSkirt/8.jpg",
+      "/hollywood-blackSkirt/6.gif",
+      "/hollywood-blackSkirt/10.jpg"
+    ],
+    "metadata": {
+      "duration": "05:31",
+      "format": "FLATE",
+      "bitrate": "24bit/48kHz",
+      "label": "Independent",
+      "releaseDate": "2015-04-09"
+    },
+    "highlightLyrics": "잔털 하나 없는 너의\n가느다란 목에 숨 쉴 때\n나 몸이 떨려와",
+    "lyricsBy": "검정치마",
+    "log": "도입부부터 또다른 세계로\n나를 끌고가는 노래",
+    "createdAt": "2026-03-30T00:00:00Z"
   }
 ]

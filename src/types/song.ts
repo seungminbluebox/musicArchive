@@ -24,4 +24,8 @@ export interface Song {
   tracks?: Track[]; // Optional for backward compatibility, but recommended for album strategy
   releaseDate?: string;
   duration?: string;
+  metadata?: {
+    duration?: string;
+    [key: string]: any;
+  };
 }

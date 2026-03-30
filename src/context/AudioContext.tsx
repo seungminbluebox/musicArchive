@@ -42,14 +42,16 @@ export function AudioProvider({ children }: { children: ReactNode }) {
       audioObjectRef.current = audio;
 
       const updateProgress = () => {
-        if (audio.duration) {
+        if (audio.duration && isFinite(audio.duration)) {
           setProgress((audio.currentTime / audio.duration) * 100);
         }
       };
 
       const handleLoadedMetadata = () => {
-        if (audio.duration) {
+        if (audio.duration && isFinite(audio.duration)) {
           setDuration(audio.duration);
+        } else {
+          setDuration(0);
         }
       };
 

@@ -23,11 +23,19 @@ export default function SongDetail({ song }: { song: Song }) {
     song.tracks?.[0] || null,
   );
   const [showTag, setShowTag] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   // Function to format seconds to mm:ss
   const formatTime = (seconds: number) => {
-    if (isNaN(seconds)) return "0:00";
+    if (isNaN(seconds) || !isFinite(seconds) || seconds <= 0) return "--:--";
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, "0")}`;
@@ -182,7 +190,7 @@ export default function SongDetail({ song }: { song: Song }) {
           className="absolute -bottom-[20%] -right-[10%] w-[60%] h-[60%] rounded-full blur-[120px]"
           style={{ background: song.themeAccent, opacity: meshOpacity }}
         />
-        <div className="absolute inset-0 opacity-[0.03] bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+        <div className="absolute inset-0 opacity-[0.03] bg-noise" />
       </div>
 
       {/* 2. FIXED HEADER/NAVIGATION */}
@@ -215,7 +223,7 @@ export default function SongDetail({ song }: { song: Song }) {
               animate={{
                 x:
                   isPlaying && currentSong?.id === song.id
-                    ? typeof window !== "undefined" && window.innerWidth < 768
+                    ? isMobile
                       ? "30%"
                       : "53%"
                     : "0%",
@@ -275,11 +283,7 @@ export default function SongDetail({ song }: { song: Song }) {
                 initial={{ opacity: 0, x: -40, rotate: -5 }}
                 animate={{
                   opacity: showTag ? 1 : 0,
-                  x: showTag
-                    ? typeof window !== "undefined" && window.innerWidth < 768
-                      ? -10
-                      : -30
-                    : -40,
+                  x: showTag ? (isMobile ? -10 : -30) : -40,
                   rotate: showTag ? -2 : -5,
                 }}
                 className="absolute top-10 -left-16 z-30 pointer-events-none origin-right sm:scale-100 scale-75"
@@ -354,9 +358,10 @@ export default function SongDetail({ song }: { song: Song }) {
                         }}
                       >
                         {currentSong?.audioSrc ===
-                        (activeTrack?.audioSrc || song.audioSrc)
+                          (activeTrack?.audioSrc || song.audioSrc) &&
+                        duration > 0
                           ? formatTime(duration)
-                          : song.duration || "--:--"}
+                          : song.duration || song.metadata?.duration || "--:--"}
                       </span>
                     </div>
 
@@ -538,10 +543,7 @@ export default function SongDetail({ song }: { song: Song }) {
 
               const layoutClass = layouts[seed % layouts.length];
               const zIndex = 10 + index;
-              const yOffset =
-                typeof window !== "undefined" && window.innerWidth < 768
-                  ? 0
-                  : (seed % 100) - 50; // No jitter on mobile
+              const yOffset = isMobile ? 0 : (seed % 100) - 50; // No jitter on mobile
               const isVideo = img.toLowerCase().match(/\.(mp4|webm|ogg|mov)$/);
 
               return (

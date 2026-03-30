@@ -7,7 +7,7 @@ import { Song } from "@/types/song";
 
 export default function RecordList({ songs }: { songs: Song[] }) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 p-8 max-w-7xl mx-auto">
+    <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8 p-4 md:p-8 max-w-7xl mx-auto">
       {songs.map((song: Song, index: number) => (
         <Link key={song.id} href={`/songs/${song.id}`}>
           <motion.div
@@ -33,18 +33,18 @@ export default function RecordList({ songs }: { songs: Song[] }) {
                   </div>
                 )}
               </motion.div>
-              <div className="absolute top-2 left-2 px-2 py-1 bg-black/50 text-white text-[10px] font-mono rounded backdrop-blur-sm">
+              <div className="absolute top-2 left-2 px-1.5 md:px-2 py-0.5 md:py-1 bg-black/50 text-white text-[8px] md:text-[10px] font-mono rounded backdrop-blur-sm">
                 {(index + 1).toString().padStart(2, "0")}
               </div>
             </div>
             <div
-              className="mt-4 border-l-2 pl-3"
+              className="mt-3 md:mt-4 border-l-2 pl-2 md:pl-3"
               style={{ borderLeftColor: song.themeSub }}
             >
-              <h3 className="text-lg font-bold leading-none mb-1 text-white">
+              <h3 className="text-sm md:text-lg font-bold leading-tight mb-0.5 md:mb-1 text-white truncate">
                 {song.title}
               </h3>
-              <p className="text-sm text-neutral-400 font-mono uppercase tracking-widest">
+              <p className="text-[10px] md:text-sm text-neutral-400 font-mono uppercase tracking-widest truncate">
                 {song.artist}
               </p>
             </div>
