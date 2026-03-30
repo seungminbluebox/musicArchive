@@ -47,15 +47,15 @@ export default function SongDetail({ song }: { song: Song }) {
   });
 
   // 2. Parallax & Transform Values (Subtle movement)
-  const heroOpacity = useTransform(smoothProgress, [0, 0.05], [1, 0]);
-  const heroY = useTransform(smoothProgress, [0, 0.05], [0, -20]);
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.05], [1, 0]);
+  const heroY = useTransform(scrollYProgress, [0, 0.05], [0, -20]);
 
   // Mesh Gradient intensity/position change
-  const meshOpacity = useTransform(smoothProgress, [0, 1], [0.4, 0.2]);
+  const meshOpacity = useTransform(scrollYProgress, [0, 1], [0.4, 0.2]);
 
   // Log (Stagger/Typing feel)
-  const logOpacity = useTransform(smoothProgress, [0.3, 0.5], [0, 1]);
-  const logY = useTransform(smoothProgress, [0.3, 0.5], [10, 0]);
+  const logOpacity = useTransform(scrollYProgress, [0.3, 0.5], [0, 1]);
+  const logY = useTransform(scrollYProgress, [0.3, 0.5], [10, 0]);
 
   // Track switching logic based on single song or tracks array
   const currentDisplayTitle = activeTrack?.title || song.title;
@@ -692,11 +692,10 @@ export default function SongDetail({ song }: { song: Song }) {
         className="fixed bottom-8 right-8 z-50 w-12 h-12 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white/50 hover:text-white hover:border-white/50 transition-all hover:scale-110 active:scale-95 group"
         onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
         initial={{ opacity: 0, y: 20 }}
-        animate={{
-          opacity: scrollYProgress.get() > 0.1 ? 1 : 0,
-          y: scrollYProgress.get() > 0.1 ? 0 : 20,
+        style={{
+          opacity: useTransform(scrollYProgress, [0, 0.1], [0, 1]),
+          y: useTransform(scrollYProgress, [0, 0.1], [20, 0]),
         }}
-        style={{ opacity: useTransform(smoothProgress, [0, 0.1], [0, 1]) }}
       >
         <UpIcon
           size={20}
