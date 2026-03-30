@@ -47,15 +47,15 @@ export default function SongDetail({ song }: { song: Song }) {
   });
 
   // 2. Parallax & Transform Values (Subtle movement)
-  const heroOpacity = useTransform(smoothProgress, [0, 0.15], [1, 0]);
-  const heroY = useTransform(smoothProgress, [0, 0.15], [0, -50]);
+  const heroOpacity = useTransform(smoothProgress, [0, 0.05], [1, 0]);
+  const heroY = useTransform(smoothProgress, [0, 0.05], [0, -20]);
 
   // Mesh Gradient intensity/position change
   const meshOpacity = useTransform(smoothProgress, [0, 1], [0.4, 0.2]);
 
   // Log (Stagger/Typing feel)
   const logOpacity = useTransform(smoothProgress, [0.3, 0.5], [0, 1]);
-  const logY = useTransform(smoothProgress, [0.3, 0.5], [30, 0]);
+  const logY = useTransform(smoothProgress, [0.3, 0.5], [10, 0]);
 
   // Track switching logic based on single song or tracks array
   const currentDisplayTitle = activeTrack?.title || song.title;
@@ -203,7 +203,7 @@ export default function SongDetail({ song }: { song: Song }) {
       </div>
 
       {/* 3. HERO SECTION (LP & PLAYER) */}
-      <section className="relative min-h-screen w-full flex items-center justify-center z-20 pt-20 md:pt-0">
+      <section className="relative h-screen w-full flex items-center justify-center z-20 pt-20 md:pt-0">
         <motion.div
           style={{ opacity: heroOpacity, y: heroY }}
           className="w-full max-w-[90vw] md:max-w-6xl flex flex-col md:flex-row items-center justify-between gap-12 md:gap-0 px-6 md:px-12 py-12 md:py-0"
