@@ -186,9 +186,9 @@ export default function SongDetail({ song }: { song: Song }) {
       </div>
 
       {/* 2. FIXED HEADER/NAVIGATION */}
-      <div className="fixed top-8 left-8 z-50 flex flex-col gap-6">
-        <Link href="/" className="flex items-center gap-4 group">
-          <div className="relative w-8 h-8 group-hover:scale-110 transition-transform duration-300">
+      <div className="fixed top-4 left-4 md:top-8 md:left-8 z-50 flex flex-col gap-6">
+        <Link href="/" className="flex items-center gap-3 md:gap-4 group">
+          <div className="relative w-6 h-6 md:w-8 md:h-8 group-hover:scale-110 transition-transform duration-300">
             <Image
               src="/icon.png"
               alt="MusicArchive Logo"
@@ -196,24 +196,29 @@ export default function SongDetail({ song }: { song: Song }) {
               className="object-contain"
             />
           </div>
-          <h1 className="text-xl font-black uppercase tracking-tighter text-white/50 group-hover:text-white transition-colors">
+          <h1 className="text-lg md:text-xl font-black uppercase tracking-tighter text-white/50 group-hover:text-white transition-colors">
             Music<span className="text-neutral-500">Archive</span>
           </h1>
         </Link>
       </div>
 
       {/* 3. HERO SECTION (LP & PLAYER) */}
-      <section className="relative h-screen w-full flex items-center justify-center z-20">
+      <section className="relative min-h-screen w-full flex items-center justify-center z-20 pt-20 md:pt-0">
         <motion.div
           style={{ opacity: heroOpacity, y: heroY }}
-          className="w-full max-w-6xl flex flex-col md:flex-row items-center justify-center gap-12 md:gap-24 px-8"
+          className="w-full max-w-6xl flex flex-col md:flex-row items-center justify-center gap-12 md:gap-24 px-6 md:px-8 py-12 md:py-0"
         >
           {/* LP Visuals - Left Side on Desktop */}
-          <div className="relative w-72 md:w-96 aspect-square flex items-center justify-center flex-shrink-0">
+          <div className="relative w-64 sm:w-72 md:w-96 aspect-square flex items-center justify-center flex-shrink-0 scale-90 sm:scale-100">
             <motion.div
               className="absolute w-[95%] aspect-square rounded-full bg-[#0a0a0a] shadow-[0_0_50px_rgba(0,0,0,0.5)] flex items-center justify-center border-[1px] border-white/5"
               animate={{
-                x: isPlaying && currentSong?.id === song.id ? "53%" : "0%",
+                x:
+                  isPlaying && currentSong?.id === song.id
+                    ? typeof window !== "undefined" && window.innerWidth < 768
+                      ? "30%"
+                      : "53%"
+                    : "0%",
                 rotate: isPlaying && currentSong?.id === song.id ? 360 : 0,
               }}
               transition={{
@@ -270,10 +275,14 @@ export default function SongDetail({ song }: { song: Song }) {
                 initial={{ opacity: 0, x: -40, rotate: -5 }}
                 animate={{
                   opacity: showTag ? 1 : 0,
-                  x: showTag ? -30 : -40,
+                  x: showTag
+                    ? typeof window !== "undefined" && window.innerWidth < 768
+                      ? -10
+                      : -30
+                    : -40,
                   rotate: showTag ? -2 : -5,
                 }}
-                className="absolute top-10 -left-16 z-30 pointer-events-none origin-right"
+                className="absolute top-10 -left-16 z-30 pointer-events-none origin-right sm:scale-100 scale-75"
               >
                 <div
                   className="relative p-5 shadow-[5px_5px_20px_rgba(0,0,0,0.4)] min-w-[140px] before:absolute before:inset-0 before:bg-[url('https://www.transparenttextures.com/patterns/paper-fibers.png')] before:opacity-10"
@@ -389,83 +398,83 @@ export default function SongDetail({ song }: { song: Song }) {
           </div>
 
           {/* Minimal Player Controls - Right Side on Desktop */}
-          <div className="text-center md:text-left w-full max-w-md flex flex-col justify-start min-h-[520px] ml-30">
+          <div className="text-center md:text-left w-full max-w-md flex flex-col justify-start md:min-h-[520px]">
             {/* 1. 최소 높이를 유지하며 내용에 따라 늘어나는 제목 섹션 */}
-            <div className="min-h-40 flex flex-col justify-end mb-6">
-              <h1 className="text-5xl font-light tracking-[0.2em] text-white uppercase flex flex-col items-center md:items-start gap-3">
-                <span className="w-full block leading-[1.2] break-keep">
+            <div className="min-h-32 md:min-h-40 flex flex-col justify-end mb-6 md:mb-10">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-light tracking-[0.15em] md:tracking-[0.2em] text-white uppercase flex flex-col items-center md:items-start gap-2 md:gap-3">
+                <span className="w-full block leading-[1.2] break-keep px-4 md:px-0">
                   {currentDisplayTitle.split(" (feat.")[0]}
                 </span>
                 {currentDisplayTitle.includes(" (feat.") && (
-                  <span className="text-[12px] font-mono text-white/30 tracking-[0.4em] lowercase italic">
+                  <span className="text-[10px] md:text-[12px] font-mono text-white/30 tracking-[0.3em] md:tracking-[0.4em] lowercase italic">
                     feat.{" "}
                     {currentDisplayTitle.split(" (feat.")[1].replace(")", "")}
                   </span>
                 )}
               </h1>
-              <p className="text-sm font-mono text-white/40 tracking-[0.3em] uppercase mt-4">
+              <p className="text-xs md:text-sm font-mono text-white/40 tracking-[0.2em] md:tracking-[0.3em] uppercase mt-3 md:mt-4">
                 {song.artist}
               </p>
             </div>
 
             {/* 2. 고정 높이의 트랙리스트 섹션 */}
-            <div className="h-64 flex flex-col mb-8">
+            <div className="max-h-64 flex flex-col mb-8 px-4 md:px-0">
               {song.tracks && song.tracks.length > 1 && (
-                <div className="flex flex-col gap-2 overflow-y-auto pr-4 scroll-smooth scrollbar-thin scrollbar-thumb-white/10">
+                <div className="flex flex-col gap-2 overflow-y-auto pr-2 md:pr-4 scroll-smooth scrollbar-thin scrollbar-thumb-white/10">
                   {song.tracks.map((track) => {
                     const isActive = currentSong?.audioSrc === track.audioSrc;
                     return (
                       <button
                         key={track.id}
                         onClick={() => handleTogglePlay(track)}
-                        className={`flex items-center justify-between px-6 py-3 rounded-full border transition-all duration-300 group/track w-full flex-shrink-0 ${
+                        className={`flex items-center justify-between px-5 md:px-6 py-2.5 md:py-3 rounded-full border transition-all duration-300 group/track w-full flex-shrink-0 ${
                           isActive
                             ? "bg-white/20 border-white text-white"
                             : "bg-white/5 border-white/10 text-white/40 hover:bg-white/10 hover:border-white/20"
                         }`}
                       >
-                        <div className="flex items-center gap-3 overflow-hidden mr-2">
+                        <div className="flex items-center gap-2 md:gap-3 overflow-hidden mr-2">
                           <MusicIcon
-                            size={12}
-                            className={`flex-shrink-0 ${
+                            size={10}
+                            className={`flex-shrink-0 md:size-[12px] ${
                               isActive
                                 ? "animate-pulse"
                                 : "opacity-0 group-hover/track:opacity-50"
                             }`}
                           />
-                          <span className="text-[10px] font-mono uppercase tracking-widest flex items-center gap-2 truncate">
+                          <span className="text-[9px] md:text-[10px] font-mono uppercase tracking-widest flex items-center gap-1.5 md:gap-2 truncate">
                             <span className="truncate">{track.title}</span>
                             {(track.isTitle === "true" ||
                               track.isTitle === true) && (
-                              <span className="flex-shrink-0 px-1.5 py-0.5 rounded-sm bg-white/20 text-[7px] font-bold tracking-normal border border-white/20">
+                              <span className="flex-shrink-0 px-1 py-0.5 rounded-sm bg-white/20 text-[6px] md:text-[7px] font-bold tracking-normal border border-white/20">
                                 TITLE
                               </span>
                             )}
                           </span>
                         </div>
                         {isActive && isPlaying ? (
-                          <div className="flex gap-1 h-3 items-end flex-shrink-0">
+                          <div className="flex gap-1 h-2.5 md:h-3 items-end flex-shrink-0">
                             <motion.div
-                              animate={{ height: [4, 12, 6] }}
+                              animate={{ height: [3, 10, 5] }}
                               transition={{ repeat: Infinity, duration: 0.5 }}
-                              className="w-[2px] bg-white"
+                              className="w-[1.5px] md:w-[2px] bg-white"
                             />
                             <motion.div
-                              animate={{ height: [8, 4, 10] }}
+                              animate={{ height: [6, 3, 8] }}
                               transition={{ repeat: Infinity, duration: 0.6 }}
-                              className="w-[2px] bg-white"
+                              className="w-[1.5px] md:w-[2px] bg-white"
                             />
                             <motion.div
-                              animate={{ height: [6, 10, 4] }}
+                              animate={{ height: [4, 8, 3] }}
                               transition={{ repeat: Infinity, duration: 0.7 }}
-                              className="w-[2px] bg-white"
+                              className="w-[1.5px] md:w-[2px] bg-white"
                             />
                           </div>
                         ) : (
                           <PlayIcon
-                            size={12}
+                            size={10}
                             fill="currentColor"
-                            className="opacity-0 group-hover/track:opacity-100 transition-opacity flex-shrink-0"
+                            className="opacity-0 group-hover/track:opacity-100 transition-opacity flex-shrink-0 md:size-[12px]"
                           />
                         )}
                       </button>
@@ -479,7 +488,7 @@ export default function SongDetail({ song }: { song: Song }) {
             <div className="flex justify-center md:justify-start">
               <button
                 onClick={() => handleTogglePlay()}
-                className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-2xl border border-white/40 text-white hover:bg-white hover:text-black hover:border-white transition-all duration-500 flex items-center justify-center group shadow-[0_0_40px_rgba(0,0,0,0.3)] hover:shadow-[0_0_50px_rgba(255,255,255,0.2)]"
+                className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-white/20 backdrop-blur-2xl border border-white/40 text-white hover:bg-white hover:text-black hover:border-white transition-all duration-500 flex items-center justify-center group shadow-[0_0_40px_rgba(0,0,0,0.3)] hover:shadow-[0_0_50px_rgba(255,255,255,0.2)]"
                 aria-label={
                   isPlaying &&
                   (currentSong?.audioSrc === currentAudioSrc ||
@@ -491,9 +500,17 @@ export default function SongDetail({ song }: { song: Song }) {
                 {isPlaying &&
                 (currentSong?.audioSrc === currentAudioSrc ||
                   currentSong?.id === song.id) ? (
-                  <PauseIcon size={32} fill="currentColor" />
+                  <PauseIcon
+                    size={24}
+                    className="md:size-[32px]"
+                    fill="currentColor"
+                  />
                 ) : (
-                  <PlayIcon size={32} fill="currentColor" className="ml-1" />
+                  <PlayIcon
+                    size={24}
+                    className="md:size-[32px] ml-1"
+                    fill="currentColor"
+                  />
                 )}
               </button>
             </div>
@@ -502,8 +519,8 @@ export default function SongDetail({ song }: { song: Song }) {
       </section>
 
       {/* 4. SCROLLABLE CONTENT AREA (The "Shininryu" style) */}
-      <div className="relative z-30 container mx-auto max-w-4xl px-8 pb-40">
-        <div className="flex flex-col gap-32 pt-20">
+      <div className="relative z-30 container mx-auto max-w-4xl px-6 md:px-8 pb-40">
+        <div className="flex flex-col gap-24 md:gap-32 pt-10 md:pt-20">
           {/* 1. Dynamic Feature Images grid (TOP) */}
           <div className="relative w-full min-h-[60vh] py-10">
             {song.images.slice(1).map((img, index) => {
@@ -513,29 +530,32 @@ export default function SongDetail({ song }: { song: Song }) {
               // Define some high-end layout styles to cycle through
               const layouts = [
                 "w-full md:w-3/5 mx-auto", // Center focused
-                "w-full md:w-2/5 ml-auto", // Right aligned
-                "w-full md:w-2/5 mr-auto", // Left aligned
-                "w-full md:w-1/2 mx-auto rotate-2", // Slight tilt
-                "w-full md:w-3/4 mr-auto -rotate-1", // Large tilt
+                "w-full md:w-2/5 md:ml-auto", // Right aligned
+                "w-full md:w-2/5 md:mr-auto", // Left aligned
+                "w-full md:w-1/2 mx-auto md:rotate-2", // Slight tilt
+                "w-full md:w-3/4 md:mr-auto md:-rotate-1", // Large tilt
               ];
 
               const layoutClass = layouts[seed % layouts.length];
               const zIndex = 10 + index;
-              const yOffset = (seed % 100) - 50; // -50px to 50px jitter
+              const yOffset =
+                typeof window !== "undefined" && window.innerWidth < 768
+                  ? 0
+                  : (seed % 100) - 50; // No jitter on mobile
               const isVideo = img.toLowerCase().match(/\.(mp4|webm|ogg|mov)$/);
 
               return (
                 <motion.div
                   key={index}
-                  initial={{ opacity: 0, y: 60 }}
+                  initial={{ opacity: 0, y: 40 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-100px" }}
+                  viewport={{ once: true, margin: "-50px" }}
                   transition={{
                     duration: 1.2,
                     delay: index * 0.1,
                     ease: [0.215, 0.61, 0.355, 1],
                   }}
-                  className={`relative aspect-[4/5] overflow-hidden shadow-2xl mb-24 transition-transform duration-700 hover:scale-[1.02] ${layoutClass}`}
+                  className={`relative aspect-[4/5] overflow-hidden shadow-2xl mb-16 md:mb-24 transition-transform duration-700 hover:scale-[1.02] ${layoutClass}`}
                   style={{ zIndex, marginTop: `${yOffset}px` }}
                 >
                   {isVideo ? (
@@ -564,7 +584,7 @@ export default function SongDetail({ song }: { song: Song }) {
 
           {/* 2. Highlighted Lyrics (MIDDLE) - Only shows if content exists */}
           {currentDisplayLyrics && currentDisplayLyrics.trim() !== "" && (
-            <div className="flex flex-col items-center py-24 relative group">
+            <div className="flex flex-col items-center py-16 md:py-24 relative group">
               {/* Minimalist Accents: Top and Bottom floating lines */}
               <div
                 className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-[3px] group-hover:w-24 transition-all duration-1000 ease-out"
@@ -576,7 +596,7 @@ export default function SongDetail({ song }: { song: Song }) {
               />
 
               <h2
-                className="text-4xl md:text-5xl font-light text-center leading-relaxed tracking-tight max-w-2xl whitespace-pre-wrap drop-shadow-xl selection:bg-white selection:text-black mb-8"
+                className="text-2xl sm:text-3xl md:text-5xl font-light text-center leading-relaxed tracking-tight max-w-2xl whitespace-pre-wrap drop-shadow-xl selection:bg-white selection:text-black mb-6 md:mb-8 px-4"
                 style={{ color: song.themeText }}
               >
                 {currentDisplayLyrics}
@@ -585,28 +605,30 @@ export default function SongDetail({ song }: { song: Song }) {
               <motion.div
                 initial={{ opacity: 0.3 }}
                 whileInView={{ opacity: 0.6 }}
-                className="flex items-center gap-3 text-xs font-mono tracking-[0.2em] uppercase"
+                className="flex items-center gap-3 text-[10px] md:text-xs font-mono tracking-[0.15em] md:tracking-[0.2em] uppercase"
                 style={{ color: song.themeText }}
               >
                 <div
-                  className="w-4 h-[1px]"
+                  className="w-3 md:w-4 h-[1px]"
                   style={{ backgroundColor: `${song.themeText}33` }}
                 />
-                <span className="flex items-center gap-1.5">
-                  <span className="uppercase opacity-70">
+                <span className="flex items-center gap-1 md:gap-1.5 flex-wrap justify-center">
+                  <span className="uppercase opacity-70 text-center">
                     {currentDisplayTitle.split(" (feat.")[0]}
                   </span>
                   {currentDisplayTitle.includes(" (feat.") && (
-                    <span className="text-[8px] opacity-40 lowercase italic">
+                    <span className="text-[7px] md:text-[8px] opacity-40 lowercase italic">
                       feat.{" "}
                       {currentDisplayTitle.split(" (feat.")[1].replace(")", "")}
                     </span>
                   )}
-                  <span className="mx-1 opacity-20">—</span>
-                  <span className="uppercase opacity-70">{song.artist}</span>
+                  <span className="mx-1 opacity-20 hidden sm:inline">—</span>
+                  <span className="uppercase opacity-70 hidden sm:inline">
+                    {song.artist}
+                  </span>
                 </span>
                 <div
-                  className="w-4 h-[1px]"
+                  className="w-3 md:w-4 h-[1px]"
                   style={{ backgroundColor: `${song.themeText}33` }}
                 />
               </motion.div>
@@ -618,7 +640,7 @@ export default function SongDetail({ song }: { song: Song }) {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              className="flex flex-col gap-8 text-xs font-mono text-white/40 leading-relaxed uppercase tracking-widest"
+              className="flex flex-col gap-6 md:gap-8 text-[10px] md:text-xs font-mono text-white/40 leading-relaxed uppercase tracking-widest px-4 md:px-0"
             >
               {(activeTrack?.lyricsBy || song.lyricsBy) && (
                 <div>
@@ -638,11 +660,11 @@ export default function SongDetail({ song }: { song: Song }) {
                     <div key={item.label} className="flex items-center gap-3">
                       <div className="relative group/color">
                         <div
-                          className="w-12 h-3 rounded-sm border border-white/20 shadow-[0_0_10px_rgba(0,0,0,0.3)] transition-all group-hover/color:w-16 group-hover/color:brightness-110"
+                          className="w-10 md:w-12 h-2.5 md:h-3 rounded-sm border border-white/20 shadow-[0_0_10px_rgba(0,0,0,0.3)] transition-all group-hover/color:w-16 group-hover/color:brightness-110"
                           style={{ backgroundColor: item.color }}
                         />
                       </div>
-                      <span className="text-[9px] text-white/40 font-mono tracking-tighter">
+                      <span className="text-[8px] md:text-[9px] text-white/40 font-mono tracking-tighter">
                         {item.color.toUpperCase()}
                       </span>
                     </div>
@@ -656,7 +678,7 @@ export default function SongDetail({ song }: { song: Song }) {
               <motion.div
                 initial={{ opacity: 0, x: 20 }}
                 whileInView={{ opacity: 1, x: 0 }}
-                className="text-lg text-white/70 leading-relaxed font-serif italic whitespace-pre-wrap border-l border-white/10 pl-12"
+                className="text-base md:text-lg text-white/70 leading-relaxed font-serif italic whitespace-pre-wrap border-l border-white/10 pl-8 md:pl-12 mx-4 md:mx-0"
               >
                 "{song.log}"
               </motion.div>
