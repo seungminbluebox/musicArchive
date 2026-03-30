@@ -206,10 +206,10 @@ export default function SongDetail({ song }: { song: Song }) {
       <section className="relative min-h-screen w-full flex items-center justify-center z-20 pt-20 md:pt-0">
         <motion.div
           style={{ opacity: heroOpacity, y: heroY }}
-          className="w-full max-w-6xl flex flex-col md:flex-row items-center justify-center gap-12 md:gap-24 px-6 md:px-8 py-12 md:py-0"
+          className="w-full max-w-[90vw] md:max-w-6xl flex flex-col md:flex-row items-center justify-between gap-12 md:gap-0 px-6 md:px-12 py-12 md:py-0"
         >
           {/* LP Visuals - Left Side on Desktop */}
-          <div className="relative w-64 sm:w-72 md:w-96 aspect-square flex items-center justify-center flex-shrink-0 scale-90 sm:scale-100">
+          <div className="relative w-64 sm:w-72 md:w-80 lg:w-[350px] aspect-square flex items-center justify-center flex-shrink-0 scale-90 sm:scale-100">
             <motion.div
               className="absolute w-[95%] aspect-square rounded-full bg-[#0a0a0a] shadow-[0_0_50px_rgba(0,0,0,0.5)] flex items-center justify-center border-[1px] border-white/5"
               animate={{
@@ -398,7 +398,7 @@ export default function SongDetail({ song }: { song: Song }) {
           </div>
 
           {/* Minimal Player Controls - Right Side on Desktop */}
-          <div className="text-center md:text-left w-full max-w-md flex flex-col justify-start md:min-h-[520px]">
+          <div className="text-center md:text-left w-full max-w-sm flex flex-col justify-start md:min-h-[520px]">
             {/* 1. 최소 높이를 유지하며 내용에 따라 늘어나는 제목 섹션 */}
             <div className="min-h-32 md:min-h-40 flex flex-col justify-end mb-6 md:mb-10">
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-light tracking-[0.15em] md:tracking-[0.2em] text-white uppercase flex flex-col items-center md:items-start gap-2 md:gap-3">
